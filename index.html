@@ -1,0 +1,705 @@
+
+
+<!DOCTYPE html>
+<html lang="el">
+<head>
+<meta charset="UTF-8">
+<title>Προγραμματισμός Skaitv.gr, Hybrid TV</title>
+
+<link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/daterangepicker/daterangepicker.css" />
+
+<style>
+    body {
+        font-family: Arial, sans-serif;
+        margin: 0;
+        padding: 20px;
+        background: #0d47a1;
+        color: white;
+    }
+
+    .container {
+        max-width: 900px;
+        margin: auto;
+        background: white;
+        color: black;
+        padding: 20px;
+        border-radius: 10px;
+        position: relative;
+        z-index: 1;
+    }
+
+    h2 { margin-top: 0; }
+
+    .format-options {
+        display: flex;
+        gap: 15px;
+        flex-wrap: wrap;
+        background: #e3eaf7;
+        padding: 10px;
+        border-radius: 6px;
+    }
+
+    .zone {
+        margin-bottom: 12px;
+        padding: 10px;
+        background: #f4f6fa;
+        border-radius: 6px;
+    }
+
+    .show-item {
+        display: flex;
+        align-items: center;
+        margin: 3px 0;
+    }
+
+    input[type="number"], input[type="text"] {
+        width: 220px;
+        padding: 5px;
+        margin-top: 5px;
+    }
+
+    button {
+        padding: 6px 12px;
+        background: #0d47a1;
+        color: white;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+        margin-right: 10px;
+    }
+
+    #result {
+        margin-top: 20px;
+        font-size: 18px;
+        font-weight: bold;
+        background: #e3eaf7;
+        padding: 15px;
+        border-radius: 6px;
+        position: sticky;
+        bottom: 0;
+    }
+
+ .warning {
+        color: #d32f2f !important;
+        font-size: 13px !important;
+        font-weight: bold;
+    }
+
+    .seasonality {
+        color: #1976d2 !important;
+        font-size: 13px !important;
+        font-weight: bold;
+        display: block;
+        margin-top: 5px;
+    }
+
+    .discount-info {
+        color: #2e7d32 !important;
+        font-size: 13px !important;
+        font-weight: bold;
+        display: block;
+        margin-top: 5px;
+    }
+
+    .discount-hint {
+        color: #ff8c00 !important; /* Πορτοκαλί χρώμα */
+        font-size: 13px !important;
+        font-weight: bold;
+        display: block;
+        margin-top: 5px;
+    }
+
+    /* FIX: daterangepicker hidden behind container */
+    .daterangepicker {
+        z-index: 999999 !important;
+    }
+/* FIX: daterangepicker text color */
+.daterangepicker,
+.daterangepicker * {
+    color: #000 !important;
+}
+
+.daterangepicker {
+    background: #fff !important;
+}
+/* Προσθήκη για εμφάνιση σε 2 στήλες */
+#morning-zone, #noon-zone, #prime-zone, #general-zone {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 5px 20px;
+}
+
+</style>
+
+<script src="https://cdn.jsdelivr.net/npm/jquery@3.7.1/dist/jquery.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/moment@2.29.4/moment.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/daterangepicker/daterangepicker.min.js"></script>
+
+</head>
+<body>
+<div class="container">
+
+<h2>Στοιχεία Πλάνου</h2>
+
+<label>Διαφημιζόμενος <br>
+<input type="text" id="advertiser">
+</label>
+<br><br>
+
+<label>Πλάνο <br>
+<input type="text" id="plan">
+</label>
+<br><br>
+
+<label>Ημερομηνίες (επιλέξτε για πιο ακριβή υπολογισμό)<br>
+<input type="text" id="dateRange">
+</label>
+
+<input type="hidden" id="dateFrom">
+<input type="hidden" id="dateTo">
+
+<br><br>
+
+<button onclick="window.open('https://www.skai.gr/tv/hybrid-tv-skai','_blank')">
+Specs & Παραδείγματα
+</button>
+
+<button onclick="window.open('https://www.skai.gr/tv/programma','_blank')">
+Πρόγραμμα Εκπομπών
+</button>
+
+<button onclick="window.open('https://www.skai.gr/tv/i-ellada-psifizei-app','_blank')">
+Τιμοκατάλογος
+</button>
+
+<button onclick="window.open('https://www.skai.gr/tv/','_blank')">
+Web TV
+</button>
+
+<hr>
+
+<h2>Επιλογή Format</h2>
+
+<div class="format-options">
+    <label><input type="radio" name="format" value="Pre-roll Web TV" checked> Pre-roll Web TV</label>
+    <label><input type="radio" name="format" value="L-Banner Hybrid Linear"> L-Banner Hybrid Linear</label>
+    <label><input type="radio" name="format" value="Pre-roll Hybrid App"> Pre-roll Hybrid App</label>
+    <label><input type="radio" name="format" value="Π/C-Banner Hybrid Linear"> Π/C-Banner Hybrid Linear</label>
+    <label><input type="radio" name="format" value="Web TV Banner"> Web TV Banner</label>
+</div>
+
+<br>
+
+<label>
+    <input type="checkbox" id="ros"> ROS
+</label>
+
+<br><br>
+<button onclick="clearAll()">Καθαρισμός όλων</button>
+
+<hr>
+
+<div class="zone" id="zone-morning">
+    <h3>Πρωινή Ζώνη</h3>
+    <button onclick="toggleZone('morning')">Επιλογή/Αποεπιλογή</button>
+    <div id="morning-zone"></div>
+</div>
+
+<div class="zone" id="zone-noon">
+    <h3>Μεσημεριανή Ζώνη</h3>
+    <button onclick="toggleZone('noon')">Επιλογή/Αποεπιλογή</button>
+    <div id="noon-zone"></div>
+</div>
+
+<div class="zone" id="zone-prime">
+    <h3>Prime Time</h3>
+    <button onclick="toggleZone('prime')">Επιλογή/Αποεπιλογή</button>
+    <div id="prime-zone"></div>
+</div>
+
+<div class="zone" id="zone-general">
+    <h3>Γενικά</h3>
+    <button onclick="toggleZone('general')">Επιλογή/Αποεπιλογή</button>
+    <div id="general-zone"></div>
+</div>
+
+<hr>
+
+<h3>Impressions → Κόστος</h3>
+<input type="number" id="impressions" placeholder="Πληκτρολόγησε Impressions">
+
+<h3>Ή Κόστος (€) → Impressions</h3>
+<input type="number" id="cost" placeholder="Πληκτρολόγησε Κόστος">
+
+<br><br>
+<button onclick="sendEmail()">Αποστολή e‑mail</button>
+
+<div id="result"></div>
+<script>
+
+const showsByFormat = {
+    "Pre-roll Web TV": makeFullShows(),
+    "Pre-roll Hybrid App": makeFullShows(),
+    "Web TV Banner": makeFullShows(),
+    "L-Banner Hybrid Linear": makeFilteredShows(),
+    "Π/C-Banner Hybrid Linear": makeFilteredShows()
+};
+
+function makeFullShows() {
+    return {
+        morning: [
+            { name: "Πρώτη Εικόνα", cpm: 15, from: "2026-01-01", to: "2026-07-20" },
+            { name: "Σήμερα", cpm: 15, from: "2026-01-01", to: "2026-07-20" },
+            { name: "Αταίριαστοι", cpm: 15, from: "2026-01-01", to: "2026-07-20" },
+            { name: "Live U", cpm: 15, from: "2026-01-01", to: "2026-07-20" },
+            { name: "Καλημέρα", cpm: 15, from: "2026-01-01", to: "2026-07-20" },
+            { name: "Δεκατιανοί", cpm: 15, from: "2026-01-01", to: "2026-07-20" },
+            { name: "Ζω Καλά", cpm: 15, from: "2026-01-01", to: "2026-05-31" }
+        ],
+        noon: [
+            { name: "Μεσημεριανό Δελτίο", cpm: 16, from: "2026-01-01", to: "2026-12-31" },
+            { name: "Pet Stories", cpm: 15, from: "2026-01-01", to: "2026-05-31" },
+            { name: "Happy Traveler", cpm: 16, from: "2026-01-01", to: "2026-12-31" },
+            { name: "Όπου Υπάρχει Ελλάδα", cpm: 16, from: "2026-01-01", to: "2026-12-31" },
+            { name: "Το Χουμε", cpm: 16, from: "2026-01-01", to: "2026-07-31" }
+        ],
+        prime: [
+            { name: "Survivor", cpm: 24, from: "2026-01-01", to: "2026-04-30" },
+            { name: "Τότε Vs Τώρα", cpm: 22, from: "2026-01-01", to: "2026-12-31" },
+            { name: "Στην Αγκαλιά Του Φ", cpm: 20, from: "2026-01-01", to: "2026-12-31" },
+            { name: "The Wall", cpm: 20, from: "2026-01-01", to: "2026-07-31" },
+            { name: "The Floor", cpm: 20, from: "2026-01-01", to: "2026-07-30" },
+            { name: "Διαχωρίζω Τη Θέση", cpm: 16, from: "2026-01-01", to: "2026-12-31" },
+            { name: "Πλυντήριο", cpm: 16, from: "2026-01-01", to: "2026-12-31" },
+            { name: "Η Ζωή Σου Όλη", cpm: 16, from: "2026-01-01", to: "2026-12-31" },
+            { name: "Κεντρικό Δελτίο", cpm: 24, from: "2026-01-01", to: "2026-12-31" },
+            { name: "Quiz with balls", cpm: 16, from: "2026-01-01", to: "2026-12-31" },
+            { name: "The Voice", cpm: 24, from: "2026-09-10", to: "2026-12-31" },
+            { name: "Prime Time", cpm: 18, from: "2026-01-01", to: "2026-12-31" }
+        ],
+        general: [
+            { name: "Monobala", cpm: 16, from: "2026-01-01", to: "2026-12-31" },
+            { name: "Η Δίκη Στον Σκαι", cpm: 16, from: "2026-01-01", to: "2026-12-31" },
+            { name: "Ντοκιμαντέρ", cpm: 16, from: "2026-01-01", to: "2026-12-31" },
+            { name: "Ελληνικές Σειρές", cpm: 16, from: "2026-01-01", to: "2026-12-31" },
+            { name: "Ξένες Ταινίες", cpm: 16, from: "2026-01-01", to: "2026-12-31" },
+            { name: "Ποιος είσαι τελικά", cpm: 16, from: "2026-01-01", to: "2026-12-31" },
+            { name: "Μέλλον Ένα", cpm: 16, from: "2026-01-01", to: "2026-12-31" }
+        ]
+    };
+}
+
+function makeFilteredShows() {
+    return {
+        morning: [
+            { name: "Πρώτη Εικόνα", cpm: 15, from: "2026-01-01", to: "2026-07-20" },
+            { name: "Σήμερα", cpm: 15, from: "2026-01-01", to: "2026-07-20" },
+            { name: "Αταίριαστοι", cpm: 15, from: "2026-01-01", to: "2026-07-20" },
+            { name: "Live U", cpm: 15, from: "2026-01-01", to: "2026-07-20" },
+            { name: "Καλημέρα", cpm: 15, from: "2026-01-01", to: "2026-07-20" },
+            { name: "Δεκατιανοί", cpm: 15, from: "2026-01-01", to: "2026-07-20" },
+            { name: "Ζω Καλά", cpm: 15, from: "2026-01-01", to: "2026-05-31" }
+        ],
+        noon: [
+            { name: "Μεσημεριανό Δελτίο", cpm: 16, from: "2026-01-01", to: "2026-12-31" },
+            { name: "Pet Stories", cpm: 15, from: "2026-01-01", to: "2026-05-31" },
+            { name: "Happy Traveler", cpm: 16, from: "2026-01-01", to: "2026-12-31" },
+            { name: "Όπου Υπάρχει Ελλάδα", cpm: 16, from: "2026-01-01", to: "2026-07-31" },
+            { name: "Το Χουμε", cpm: 16, from: "2026-01-01", to: "2026-07-31" }
+        ],
+        prime: [
+            { name: "Survivor", cpm: 24, from: "2026-01-01", to: "2026-04-30" },
+            { name: "Τότε Vs Τώρα", cpm: 22, from: "2026-01-01", to: "2026-05-31" },
+            { name: "Στην Αγκαλιά Του Φ", cpm: 20, from: "2026-01-01", to: "2026-05-31" },
+            { name: "The Wall", cpm: 20, from: "2026-01-01", to: "2026-05-31" },
+            { name: "The Floor", cpm: 20, from: "2026-01-01", to: "2026-05-30" },
+            { name: "Διαχωρίζω Τη Θέση", cpm: 16, from: "2026-01-01", to: "2026-07-31" },
+            { name: "Πλυντήριο", cpm: 16, from: "2026-01-01", to: "2026-07-31" },
+            { name: "Η Ζωή Σου Όλη", cpm: 16, from: "2026-01-01", to: "2026-07-31" },
+            { name: "Κεντρικό Δελτίο", cpm: 24, from: "2026-01-01", to: "2026-12-31" },
+            { name: "Quiz with balls", cpm: 16, from: "2026-01-01", to: "2026-07-31" },
+            { name: "The Voice", cpm: 24, from: "2026-09-10", to: "2026-12-31" },
+            { name: "Prime Time", cpm: 18, from: "2026-01-01", to: "2026-07-31" }
+        ],
+        general: [
+            { name: "Monobala", cpm: 16, from: "2026-01-01", to: "2026-05-31" },
+            { name: "Η Δίκη Στον Σκαι", cpm: 16, from: "2026-01-01", to: "2026-05-31" },
+            { name: "Ξένες Ταινίες", cpm: 16, from: "2026-01-01", to: "2026-12-31" }
+        ]
+    };
+}
+
+function formatEuroDate(iso) {
+    if (!iso) return "";
+    const [y, m, d] = iso.split("-");
+    return `${d}/${m}/${y}`;
+}
+
+function parseDate(str) {
+    if (!str) return null;
+    return new Date(str);
+}
+
+function daysBetween(a, b) {
+    return Math.floor((b - a) / (1000 * 60 * 60 * 24)) + 1;
+}
+
+function validateAvailability(selectedShows, dateFrom, dateTo) {
+    const warnings = [];
+    selectedShows.forEach(cb => {
+        const name = cb.dataset.name;
+        const from = cb.dataset.from;
+        const to = cb.dataset.to;
+        const showFrom = new Date(from);
+        const showTo = new Date(to);
+        if (dateFrom && dateFrom < showFrom) {
+            warnings.push(`${name}: διαθέσιμη από ${formatEuroDate(from)} έως ${formatEuroDate(to)}`);
+        }
+        if (dateTo && dateTo > showTo) {
+            warnings.push(`${name}: διαθέσιμη από ${formatEuroDate(from)} έως ${formatEuroDate(to)}`);
+        }
+    });
+    return warnings;
+}
+
+function renderShowsForFormat(format) {
+    const data = showsByFormat[format];
+    const prevSelected = new Set([...document.querySelectorAll('.show:checked')].map(cb => cb.dataset.name));
+    const zones = [
+        { key: "morning", divId: "morning-zone", zoneId: "zone-morning" },
+        { key: "noon", divId: "noon-zone", zoneId: "zone-noon" },
+        { key: "prime", divId: "prime-zone", zoneId: "zone-prime" },
+        { key: "general", divId: "general-zone", zoneId: "zone-general" }
+    ];
+    zones.forEach(z => {
+        const container = document.getElementById(z.divId);
+        const zoneWrapper = document.getElementById(z.zoneId);
+        container.innerHTML = "";
+        const shows = (data && data[z.key]) ? data[z.key] : [];
+        if (!shows.length) {
+            zoneWrapper.style.display = "none";
+            return;
+        }
+        zoneWrapper.style.display = "block";
+        shows.forEach(show => {
+            const checked = prevSelected.has(show.name) ? "checked" : "";
+            const html = `
+                <label class="show-item">
+                    <input type="checkbox"
+                           class="show ${z.key}"
+                           data-name="${show.name}"
+                           data-cpm="${show.cpm}"
+                           data-from="${show.from}"
+                           data-to="${show.to}"
+                           ${checked}>
+                    ${show.name}
+                    <span style="color:#666; font-size:12px; margin-left:6px;">
+                        – ${formatEuroDate(show.from)} έως ${formatEuroDate(show.to)}
+                    </span>
+                </label>
+            `;
+            container.insertAdjacentHTML("beforeend", html);
+        });
+    });
+}
+
+let lastResultText = "";
+
+function calculate() {
+    const ros = document.getElementById('ros').checked;
+    const format = document.querySelector("input[name='format']:checked").value;
+    const selected = document.querySelectorAll('.show:checked');
+    const impsField = document.getElementById('impressions');
+    const costField = document.getElementById('cost');
+    const centralImps = parseFloat(impsField.value);
+    const costInput = parseFloat(costField.value);
+    const dateFrom = parseDate(document.getElementById("dateFrom").value);
+    const dateTo = parseDate(document.getElementById("dateTo").value);
+
+    let availabilityWarnings = [];
+    if (dateFrom && dateTo && selected.length > 0) {
+        availabilityWarnings = validateAvailability([...selected], dateFrom, dateTo);
+    }
+
+    if (selected.length === 0 && !ros) {
+        document.getElementById("result").textContent = "Δεν έχεις επιλέξει εκπομπές.";
+        return;
+    }
+
+    let avgCPM = 0;
+    if (format === "Web TV Banner") {
+        if (ros) {
+            avgCPM = 4;
+        } else {
+            const selectedArr = [...selected];
+            const names = selectedArr.map(cb => cb.dataset.name.toLowerCase());
+            const isPremium = n => n.includes("survivor") || n.includes("the voice");
+            const hasPremium = names.some(isPremium);
+            const allPremium = selectedArr.length > 0 && names.every(isPremium);
+            if (allPremium) avgCPM = 4.5;
+            else if (hasPremium) avgCPM = 4;
+            else avgCPM = 3.5;
+        }
+    } else if (ros || format === "Pre-roll Hybrid App") {
+        avgCPM = 16;
+    } else {
+        let sum = 0;
+        selected.forEach(cb => {
+            let base = parseFloat(cb.dataset.cpm);
+            if (format === "Π/C-Banner Hybrid Linear") {
+                if (cb.classList.contains("prime")) base += 2;
+                else base += 1;
+            }
+            sum += base;
+        });
+        avgCPM = sum / selected.length;
+    }
+
+    let totalDays = 1;
+    let normalDays = 1;
+    let seasonalDays = 0;
+    if (dateFrom && dateTo && dateTo >= dateFrom) {
+        totalDays = daysBetween(dateFrom, dateTo);
+        let currentYear = dateFrom.getFullYear();
+        const endYear = dateTo.getFullYear();
+        while (currentYear <= endYear) {
+            const seasonStart = new Date(currentYear, 6, 25);
+            const seasonEnd = new Date(currentYear, 8, 4);
+            const rangeStart = dateFrom > seasonStart ? dateFrom : seasonStart;
+            const rangeEnd = dateTo < seasonEnd ? dateTo : seasonEnd;
+            if (rangeEnd >= rangeStart) {
+                seasonalDays += daysBetween(rangeStart, rangeEnd);
+            }
+            currentYear++;
+        }
+        normalDays = totalDays - seasonalDays;
+        if (normalDays < 0) normalDays = 0;
+    }
+
+    const seasonalityApplied = (seasonalDays > 0 && format !== "Web TV Banner");
+    const result = document.getElementById("result");
+
+    if (!isNaN(costInput) && costInput > 0) {
+        let effectiveCPM = seasonalityApplied ? (normalDays * avgCPM + seasonalDays * 14) / totalDays : avgCPM;
+        let discountApplied = false;
+        if (costInput >= 3000) {
+            effectiveCPM = effectiveCPM * 0.90;
+            discountApplied = true;
+        }
+        let impressions = (costInput / effectiveCPM) * 1000;
+        let warning = "";
+        // Αλλαγή: Εμφάνιση ειδοποίησης από 1200€
+        if (!discountApplied && costInput >= 1200 && costInput < 3000) {
+            warning = `\n<span class="discount-hint">💡 Για δαπάνη 3.000 € και άνω, δικαιούστε έκπτωση CPM 10%.</span>`;
+        }
+
+       lastResultText =
+    `Σύνολο Impressions: ${Math.round(impressions).toLocaleString("el-GR")}\n` +
+    `Κόστος: ${costInput.toLocaleString("el-GR")} €` +
+    (discountApplied 
+        ? `\n<span class="discount-info">✅ (Έχει εφαρμοστεί έκπτωση 10% στο CPM — bonus impressions)</span>` 
+        : "") +
+    (seasonalityApplied
+        ? `\n<span class="seasonality">☀️ (Έχει εφαρμοστεί seasonality CPM στις αντίστοιχες ημερομηνίες -25/7-4/9)</span>`
+        : "") +
+    warning +
+    (availabilityWarnings.length > 0
+        ? `\n\n<span class="warning">⚠️ Προειδοποιήσεις:<br>` + availabilityWarnings.join("<br>") + `</span>`
+        : "");
+
+        result.innerHTML = lastResultText.replace(/\n/g, "<br>");
+        return;
+    }
+
+    if (isNaN(centralImps) || centralImps <= 0) {
+        result.textContent = "Βάλε impressions ή κόστος.";
+        return;
+    }
+
+    const impsPerDay = centralImps / totalDays;
+    let costNormal = normalDays * impsPerDay * (avgCPM / 1000);
+    let costSeasonal = seasonalDays * impsPerDay * (seasonalityApplied ? 14 / 1000 : avgCPM / 1000);
+    let totalCost = costNormal + costSeasonal;
+    let discountApplied = false;
+    let finalImps = centralImps;
+
+    if (totalCost >= 3000) {
+        discountApplied = true;
+        const discountedCPM = avgCPM * 0.90;
+        finalImps = Math.round((totalCost / discountedCPM) * 1000);
+    }
+
+    let warning = "";
+    // Αλλαγή: Εμφάνιση ειδοποίησης από 1200€
+    if (!discountApplied && totalCost >= 1200 && totalCost < 3000) {
+        warning = `\n<span class="discount-hint">💡 Για δαπάνη 3.000 € και άνω, δικαιούστε έκπτωση CPM 10%.</span>`;
+    }
+
+    lastResultText =
+    `Σύνολο Impressions: ${finalImps.toLocaleString("el-GR")}\n` +
+    `Τελικό Κόστος: ${totalCost.toLocaleString("el-GR", {
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2
+    })} €` +
+    (discountApplied 
+        ? `\n<span class="discount-info">✅ (Έχει εφαρμοστεί έκπτωση 10% στο CPM — αυξημένα impressions)</span>` 
+        : "") +
+    (seasonalityApplied 
+        ? `\n<span class="seasonality">☀️ (Έχει εφαρμοστεί seasonality CPM στις αντίστοιχες ημερομηνίες -25/7-4/9)</span>` 
+        : "") +
+    warning +
+    (availabilityWarnings.length > 0
+        ? `\n\n<span class="warning">⚠️ Προειδοποιήσεις:<br>` + availabilityWarnings.join("<br>") + `</span>`
+        : "");
+
+    result.innerHTML = lastResultText.replace(/\n/g, "<br>");
+}
+
+function toggleZone(zoneClass) {
+    const boxes = document.querySelectorAll('.' + zoneClass);
+    if (!boxes.length) return;
+    const allChecked = [...boxes].every(cb => cb.checked);
+    boxes.forEach(cb => cb.checked = !allChecked);
+    calculate();
+}
+
+function clearAll() {
+    document.querySelectorAll('.show').forEach(cb => cb.checked = false);
+    document.getElementById('ros').checked = false;
+    document.getElementById('impressions').value = "";
+    document.getElementById('cost').value = "";
+    document.getElementById('impressions').disabled = false;
+    document.getElementById('cost').disabled = false;
+    document.getElementById('dateRange').value = "";
+    document.getElementById('dateFrom').value = "";
+    document.getElementById('dateTo').value = "";
+    lastResultText = "";
+    document.getElementById("result").textContent = "";
+}
+
+function sendEmail() {
+    if (!lastResultText) {
+        alert("Κάνε πρώτα έναν υπολογισμό πριν την αποστολή e‑mail.");
+        return;
+    }
+    const advertiser = document.getElementById("advertiser").value;
+    const plan = document.getElementById("plan").value;
+    const dateFrom = formatEuroDate(document.getElementById("dateFrom").value);
+    const dateTo = formatEuroDate(document.getElementById("dateTo").value);
+    const selectedShows = [...document.querySelectorAll('.show:checked')].map(cb => cb.dataset.name).join(", ");
+    const format = document.querySelector("input[name='format']:checked").value;
+    const ros = document.getElementById("ros").checked ? "Ναι" : "Όχι";
+    const subject = `Προγραμματισμός ${format}`;
+
+    let cleanResultText = lastResultText
+        .replace(/<br\s*\/?>/gi, "\n")
+        .replace(/<\/?[^>]+(>|$)/g, "");
+
+    const body =
+        `Διαφημιζόμενος: ${advertiser}\n` +
+        `Πλάνο: ${plan}\n` +
+        `Ημερομηνίες: ${dateFrom} - ${dateTo}\n\n` +
+        `Format: ${format}\n` +
+        `ROS: ${ros}\n` +
+        `Εκπομπές: ${selectedShows}\n\n` +
+        `${cleanResultText}`;
+
+    const mailto = `mailto:ckassos@skai.gr?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+    window.location.href = mailto;
+}
+
+$(function() {
+    $('#dateRange').daterangepicker({
+        autoUpdateInput: false,
+        locale: {
+            format: 'DD/MM/YYYY',
+            applyLabel: 'Εφαρμογή',
+            cancelLabel: 'Ακύρωση',
+            daysOfWeek: ['Κυρ','Δευ','Τρι','Τετ','Πεμ','Παρ','Σαβ'],
+            monthNames: [
+                'Ιανουάριος','Φεβρουάριος','Μάρτιος','Απρίλιος','Μάιος','Ιούνιος',
+                'Ιούλιος','Αύγουστος','Σεπτέμβριος','Οκτώβριος','Νοέμβριος','Δεκέμβριος'
+            ]
+        },
+        opens: 'center',
+        ranges: {
+            'Επόμενες 15 ημέρες': [moment(), moment().add(14, 'days')],
+            'Επόμενος μήνας': [moment().add(1, 'month').startOf('month'), moment().add(1, 'month').endOf('month')]
+        }
+    });
+
+    $('#dateRange').on('apply.daterangepicker', function(ev, picker) {
+        $(this).val(picker.startDate.format('DD/MM/YYYY') + ' - ' + picker.endDate.format('DD/MM/YYYY'));
+        document.getElementById("dateFrom").value = picker.startDate.format('YYYY-MM-DD');
+        document.getElementById("dateTo").value = picker.endDate.format('YYYY-MM-DD');
+        calculate();
+    });
+
+    $('#dateRange').on('cancel.daterangepicker', function() {
+        $(this).val('');
+        document.getElementById("dateFrom").value = "";
+        document.getElementById("dateTo").value = "";
+        calculate();
+    });
+});
+
+document.getElementById("ros").addEventListener("change", () => {
+    if (document.getElementById("ros").checked) {
+        document.querySelectorAll(".show").forEach(cb => cb.checked = false);
+    }
+    calculate();
+});
+
+document.addEventListener("change", (e) => {
+    if (e.target.classList.contains("show")) {
+        if (document.getElementById("ros").checked) {
+            document.getElementById("ros").checked = false;
+        }
+        calculate();
+    }
+});
+
+const impsField = document.getElementById('impressions');
+const costField = document.getElementById('cost');
+
+impsField.addEventListener('input', () => {
+    const imps = parseFloat(impsField.value);
+    if (!isNaN(imps) && imps > 0) {
+        costField.value = "";
+        costField.disabled = true;
+    } else {
+        costField.disabled = false;
+    }
+    calculate();
+});
+
+costField.addEventListener('input', () => {
+    const c = parseFloat(costField.value);
+    if (!isNaN(c) && c > 0) {
+        impsField.value = "";
+        impsField.disabled = true;
+    } else {
+        impsField.disabled = false;
+    }
+    calculate();
+});
+
+window.addEventListener("load", () => {
+    const format = document.querySelector('input[name="format"]:checked').value;
+    renderShowsForFormat(format);
+    calculate();
+});
+
+document.querySelectorAll('input[name="format"]').forEach(radio => {
+    radio.addEventListener('change', () => {
+        const format = document.querySelector('input[name="format"]:checked').value;
+        renderShowsForFormat(format);
+        calculate();
+    });
+});
+
+</script>
+
+</div>
+</body>
+</html>
