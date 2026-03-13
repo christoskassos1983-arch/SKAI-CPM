@@ -1,134 +1,269 @@
-
-
 <!DOCTYPE html>
 <html lang="el">
 <head>
 <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Προγραμματισμός Skaitv.gr, Hybrid TV</title>
 
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/daterangepicker/daterangepicker.css" />
 
 <style>
+    :root {
+        --primary-color: #0d47a1;
+        --primary-hover: #1565c0;
+        --bg-body: #f0f2f5;
+        --bg-container: #ffffff;
+        --text-main: #1a1a1a;
+        --text-muted: #64748b;
+        --border-color: #e2e8f0;
+        --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+    }
+
     body {
-        font-family: Arial, sans-serif;
+        font-family: 'Inter', sans-serif;
         margin: 0;
-        padding: 20px;
+        padding: 40px 20px;
         background: #0d47a1;
+        color: var(--text-main);
+        line-height: 1.5;
+    }
+
+    /* Lock Screen Overlay */
+    #lock-screen {
+        position: fixed;
+        top: 0; left: 0;
+        width: 100%; height: 100%;
+        background: var(--primary-color);
+        z-index: 1000000;
+        display: flex;
+        align-items: center;
+        justify-content: center;
         color: white;
     }
+    .lock-box {
+        background: white;
+        padding: 40px;
+        border-radius: 16px;
+        color: var(--text-main);
+        box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.2);
+        max-width: 400px;
+        width: 90%;
+        text-align: center;
+    }
+    .lock-box h2 { margin-bottom: 8px; color: var(--primary-color); }
+    .lock-box input {
+        width: 100%;
+        padding: 12px 16px;
+        margin: 20px 0;
+        border: 2px solid var(--border-color);
+        border-radius: 8px;
+        font-size: 16px;
+        transition: border-color 0.2s;
+    }
+    .lock-box input:focus { border-color: var(--primary-color); outline: none; }
+    .lock-box button {
+        width: 100%;
+        padding: 12px;
+        background: var(--primary-color);
+        color: white;
+        border: none;
+        border-radius: 8px;
+        cursor: pointer;
+        font-weight: 600;
+        font-size: 16px;
+        transition: background 0.2s;
+    }
+    .lock-box button:hover { background: var(--primary-hover); }
 
     .container {
-        max-width: 900px;
+        max-width: 1000px;
         margin: auto;
-        background: white;
-        color: black;
-        padding: 20px;
-        border-radius: 10px;
-        position: relative;
-        z-index: 1;
+        background: var(--bg-container);
+        padding: 40px;
+        border-radius: 16px;
+        box-shadow: var(--shadow);
     }
 
-    h2 { margin-top: 0; }
+    h2 { 
+        font-weight: 700; 
+        color: var(--primary-color);
+        border-bottom: 2px solid var(--border-color);
+        padding-bottom: 10px;
+        margin-bottom: 25px;
+    }
+
+    .form-group {
+        margin-bottom: 20px;
+    }
+
+    label {
+        display: block;
+        font-weight: 600;
+        margin-bottom: 8px;
+        font-size: 14px;
+        color: var(--text-main);
+    }
+
+    input[type="text"], input[type="number"] {
+        width: 100%;
+        max-width: 400px;
+        padding: 10px 14px;
+        border: 1px solid var(--border-color);
+        border-radius: 8px;
+        font-size: 15px;
+        background: #f8fafc;
+        transition: all 0.2s;
+    }
+    input[type="text"]:focus, input[type="number"]:focus {
+        background: #fff;
+        border-color: var(--primary-color);
+        box-shadow: 0 0 0 3px rgba(13, 71, 161, 0.1);
+        outline: none;
+    }
+
+    .nav-buttons {
+        display: flex;
+        gap: 10px;
+        flex-wrap: wrap;
+        margin: 25px 0;
+    }
+
+    .nav-buttons button {
+        background: #f1f5f9;
+        color: var(--primary-color);
+        border: 1px solid var(--border-color);
+        font-weight: 500;
+    }
+    .nav-buttons button:hover {
+        background: #e2e8f0;
+    }
 
     .format-options {
         display: flex;
-        gap: 15px;
+        gap: 20px;
         flex-wrap: wrap;
-        background: #e3eaf7;
-        padding: 10px;
-        border-radius: 6px;
+        background: #f8fafc;
+        padding: 20px;
+        border-radius: 12px;
+        border: 1px solid var(--border-color);
+        margin-bottom: 25px;
+    }
+
+    .format-options label {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        cursor: pointer;
+        font-weight: 500;
+        margin-bottom: 0;
     }
 
     .zone {
-        margin-bottom: 12px;
-        padding: 10px;
-        background: #f4f6fa;
+        margin-bottom: 20px;
+        padding: 20px;
+        background: #ffffff;
+        border: 1px solid var(--border-color);
+        border-radius: 12px;
+        transition: transform 0.2s;
+    }
+    .zone:hover { transform: translateY(-2px); box-shadow: 0 10px 15px -3px rgba(0,0,0,0.05); }
+
+    #zone-morning h3 { color: #ea580c; }
+    #zone-noon h3 { color: #ca8a04; }
+    #zone-prime h3 { color: #7c3aed; }
+    #zone-general h3 { color: #0d9488; }
+
+    .zone h3 {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        margin-top: 0;
+        font-size: 18px;
+        font-weight: 700;
+    }
+
+    .zone-actions {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 15px;
+    }
+
+    .btn-toggle {
+        padding: 4px 12px;
+        font-size: 12px;
+        background: #f1f5f9;
+        color: #475569;
         border-radius: 6px;
+    }
+
+    .show-list {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+        gap: 10px;
     }
 
     .show-item {
         display: flex;
         align-items: center;
-        margin: 3px 0;
+        padding: 8px;
+        border-radius: 6px;
+        background: #f8fafc;
+        font-size: 14px;
+        cursor: pointer;
     }
+    .show-item:hover { background: #f1f5f9; }
+    .show-item input { margin-right: 10px; }
 
-    input[type="number"], input[type="text"] {
-        width: 220px;
-        padding: 5px;
-        margin-top: 5px;
+    .show-dates {
+        color: var(--text-muted);
+        font-size: 11px;
+        margin-left: auto;
     }
 
     button {
-        padding: 6px 12px;
-        background: #0d47a1;
+        padding: 10px 20px;
+        background: var(--primary-color);
         color: white;
         border: none;
-        border-radius: 4px;
+        border-radius: 8px;
         cursor: pointer;
-        margin-right: 10px;
+        font-weight: 600;
+        font-size: 14px;
+        transition: all 0.2s;
     }
+    button:hover { background: var(--primary-hover); transform: translateY(-1px); }
 
     #result {
-        margin-top: 20px;
-        font-size: 18px;
-        font-weight: bold;
-        background: #e3eaf7;
-        padding: 15px;
-        border-radius: 6px;
+        margin-top: 30px;
+        font-size: 16px;
+        background: #f0f7ff;
+        padding: 25px;
+        border-radius: 12px;
+        border-left: 5px solid var(--primary-color);
+        line-height: 1.8;
         position: sticky;
-        bottom: 0;
+        bottom: 20px;
+        box-shadow: 0 -10px 25px -5px rgba(0,0,0,0.1);
     }
 
- .warning {
-        color: #d32f2f !important;
-        font-size: 13px !important;
-        font-weight: bold;
+    .warning { color: #dc2626 !important; font-weight: 600; }
+    .seasonality { color: #2563eb !important; font-weight: 600; }
+    .discount-info { color: #16a34a !important; font-weight: 600; }
+    .discount-hint { color: #d97706 !important; font-weight: 600; }
+
+    hr { border: 0; border-top: 1px solid var(--border-color); margin: 30px 0; }
+
+    .ros-box {
+        background: #fffbeb;
+        border: 1px solid #fef3c7;
+        padding: 15px;
+        border-radius: 8px;
+        display: inline-flex;
+        align-items: center;
+        gap: 10px;
     }
-
-    .seasonality {
-        color: #1976d2 !important;
-        font-size: 13px !important;
-        font-weight: bold;
-        display: block;
-        margin-top: 5px;
-    }
-
-    .discount-info {
-        color: #2e7d32 !important;
-        font-size: 13px !important;
-        font-weight: bold;
-        display: block;
-        margin-top: 5px;
-    }
-
-    .discount-hint {
-        color: #ff8c00 !important; /* Πορτοκαλί χρώμα */
-        font-size: 13px !important;
-        font-weight: bold;
-        display: block;
-        margin-top: 5px;
-    }
-
-    /* FIX: daterangepicker hidden behind container */
-    .daterangepicker {
-        z-index: 999999 !important;
-    }
-/* FIX: daterangepicker text color */
-.daterangepicker,
-.daterangepicker * {
-    color: #000 !important;
-}
-
-.daterangepicker {
-    background: #fff !important;
-}
-/* Προσθήκη για εμφάνιση σε 2 στήλες */
-#morning-zone, #noon-zone, #prime-zone, #general-zone {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 5px 20px;
-}
-
 </style>
 
 <script src="https://cdn.jsdelivr.net/npm/jquery@3.7.1/dist/jquery.min.js"></script>
@@ -137,105 +272,148 @@
 
 </head>
 <body>
+
+<div id="lock-screen">
+    <div class="lock-box">
+        <h2>Πρόσβαση</h2>
+        <p>Εισάγετε email </p>
+        <input type="text" id="auth-input" placeholder="user@skai.gr">
+        <button onclick="checkAuth()">Είσοδος</button>
+        <p id="auth-error" style="color: #dc2626; font-size: 14px; font-weight: 600; margin-top: 15px; display: none;">
+            Μη έγκυρα στοιχεία.
+        </p>
+    </div>
+</div>
+
 <div class="container">
 
 <h2>Στοιχεία Πλάνου</h2>
 
-<label>Διαφημιζόμενος <br>
-<input type="text" id="advertiser">
-</label>
-<br><br>
+<div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+    <div class="form-group">
+        <label>Διαφημιζόμενος</label>
+        <input type="text" id="advertiser" placeholder="Όνομα εταιρείας">
+    </div>
+    <div class="form-group">
+        <label>Πλάνο</label>
+        <input type="text" id="plan" placeholder="Όνομα καμπάνιας">
+    </div>
+</div>
 
-<label>Πλάνο <br>
-<input type="text" id="plan">
-</label>
-<br><br>
-
-<label>Ημερομηνίες (επιλέξτε για πιο ακριβή υπολογισμό)<br>
-<input type="text" id="dateRange">
-</label>
+<div class="form-group">
+    <label>Ημερομηνίες Καμπάνιας</label>
+    <input type="text" id="dateRange" placeholder="Επιλέξτε διάστημα..." style="max-width: 100%;">
+</div>
 
 <input type="hidden" id="dateFrom">
 <input type="hidden" id="dateTo">
 
-<br><br>
-
-<button onclick="window.open('https://www.skai.gr/tv/hybrid-tv-skai','_blank')">
-Specs & Παραδείγματα
-</button>
-
-<button onclick="window.open('https://www.skai.gr/tv/programma','_blank')">
-Πρόγραμμα Εκπομπών
-</button>
-
-<button onclick="window.open('https://www.skai.gr/tv/i-ellada-psifizei-app','_blank')">
-Τιμοκατάλογος
-</button>
-
-<button onclick="window.open('https://www.skai.gr/tv/','_blank')">
-Web TV
-</button>
+<div class="nav-buttons">
+    <button onclick="window.open('https://www.skai.gr/tv/hybrid-tv-skai','_blank')">Specs & Παραδείγματα</button>
+    <button onclick="window.open('https://www.skai.gr/tv/programma','_blank')">Πρόγραμμα</button>
+    <button onclick="window.open('https://www.skai.gr/tv/i-ellada-psifizei-app','_blank')">Τιμοκατάλογος</button>
+</div>
 
 <hr>
 
-<h2>Επιλογή Format</h2>
+<h2>Format & Στόχευση</h2>
 
 <div class="format-options">
     <label><input type="radio" name="format" value="Pre-roll Web TV" checked> Pre-roll Web TV</label>
-    <label><input type="radio" name="format" value="L-Banner Hybrid Linear"> L-Banner Hybrid Linear</label>
+    <label><input type="radio" name="format" value="L-Banner Hybrid Linear"> L-Banner Hybrid</label>
     <label><input type="radio" name="format" value="Pre-roll Hybrid App"> Pre-roll Hybrid App</label>
-    <label><input type="radio" name="format" value="Π/C-Banner Hybrid Linear"> Π/C-Banner Hybrid Linear</label>
+    <label><input type="radio" name="format" value="Π/C-Banner Hybrid Linear"> Π/C-Banner Hybrid</label>
     <label><input type="radio" name="format" value="Web TV Banner"> Web TV Banner</label>
 </div>
 
-<br>
+<div class="ros-box">
+    <label style="margin-bottom:0; display:flex; align-items:center; gap:8px;">
+        <input type="checkbox" id="ros" style="width:18px; height:18px;"> 
+        <span>Ενεργοποίηση <strong>ROS</strong> (Run on Shows)</span>
+    </label>
+</div>
 
-<label>
-    <input type="checkbox" id="ros"> ROS
-</label>
-
-<br><br>
-<button onclick="clearAll()">Καθαρισμός όλων</button>
+<div style="margin-top:20px;">
+    <button onclick="clearAll()" style="background:#f1f5f9; color:#64748b;">Καθαρισμός</button>
+</div>
 
 <hr>
 
 <div class="zone" id="zone-morning">
-    <h3>Πρωινή Ζώνη</h3>
-    <button onclick="toggleZone('morning')">Επιλογή/Αποεπιλογή</button>
-    <div id="morning-zone"></div>
+    <div class="zone-actions">
+        <h3>☀️ Πρωινή Ζώνη</h3>
+        <button class="btn-toggle" onclick="toggleZone('morning')">Επιλογή όλων</button>
+    </div>
+    <div id="morning-zone" class="show-list"></div>
 </div>
 
 <div class="zone" id="zone-noon">
-    <h3>Μεσημεριανή Ζώνη</h3>
-    <button onclick="toggleZone('noon')">Επιλογή/Αποεπιλογή</button>
-    <div id="noon-zone"></div>
+    <div class="zone-actions">
+        <h3>🍴 Μεσημεριανή Ζώνη</h3>
+        <button class="btn-toggle" onclick="toggleZone('noon')">Επιλογή όλων</button>
+    </div>
+    <div id="noon-zone" class="show-list"></div>
 </div>
 
 <div class="zone" id="zone-prime">
-    <h3>Prime Time</h3>
-    <button onclick="toggleZone('prime')">Επιλογή/Αποεπιλογή</button>
-    <div id="prime-zone"></div>
+    <div class="zone-actions">
+        <h3>🌙 Prime Time</h3>
+        <button class="btn-toggle" onclick="toggleZone('prime')">Επιλογή όλων</button>
+    </div>
+    <div id="prime-zone" class="show-list"></div>
 </div>
 
 <div class="zone" id="zone-general">
-    <h3>Γενικά</h3>
-    <button onclick="toggleZone('general')">Επιλογή/Αποεπιλογή</button>
-    <div id="general-zone"></div>
+    <div class="zone-actions">
+        <h3>📺 Γενικά</h3>
+        <button class="btn-toggle" onclick="toggleZone('general')">Επιλογή όλων</button>
+    </div>
+    <div id="general-zone" class="show-list"></div>
 </div>
 
 <hr>
 
-<h3>Impressions → Κόστος</h3>
-<input type="number" id="impressions" placeholder="Πληκτρολόγησε Impressions">
+<div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+    <div class="form-group">
+        <label>Στόχος Impressions</label>
+        <input type="number" id="impressions" placeholder="π.χ. 100000">
+    </div>
+    <div class="form-group">
+        <label>Διαθέσιμο Budget (€)</label>
+        <input type="number" id="cost" placeholder="π.χ. 1500">
+    </div>
+</div>
 
-<h3>Ή Κόστος (€) → Impressions</h3>
-<input type="number" id="cost" placeholder="Πληκτρολόγησε Κόστος">
-
-<br><br>
-<button onclick="sendEmail()">Αποστολή e‑mail</button>
+<div style="margin-top: 20px;">
+    <button onclick="sendEmail()" style="background:#059669; width: 100%; padding: 15px; font-size: 16px;">
+        ✉️ Αποστολή Πλάνου με e-mail
+    </button>
+</div>
 
 <div id="result"></div>
+
 <script>
+/* --- ΟΛΗ Η ΛΕΙΤΟΥΡΓΙΚΟΤΗΤΑ ΠΑΡΑΜΕΝΕΙ ΩΣ ΕΙΧΕ --- */
+function checkAuth() {
+    const input = document.getElementById("auth-input").value.trim().toLowerCase();
+    const errorMsg = document.getElementById("auth-error");
+    const allowedDomains = ["@skai.gr", "@wppmedia.com", "@rascalmedia.gr", "@umww.com", "@omc.com","@havasmedia.com","@novibet.com","@vidads.gr","@tempomediagroup.gr","@mindshare.gr","@dentsu.com","@zenithmedia.com","@maxmediagreece.com","@theadstore.gr","@initiative.com"];
+    const masterPass = "skai2026";
+    const isAllowedEmail = allowedDomains.some(domain => input.endsWith(domain));
+    const isMasterPass = (input === masterPass);
+    if (isAllowedEmail || isMasterPass) {
+        localStorage.setItem("skai_auth", "true");
+        document.getElementById("lock-screen").style.display = "none";
+    } else {
+        errorMsg.style.display = "block";
+    }
+}
+window.addEventListener("DOMContentLoaded", () => {
+    if (localStorage.getItem("skai_auth") === "true") {
+        document.getElementById("lock-screen").style.display = "none";
+    }
+});
+document.getElementById("auth-input").addEventListener("keypress", (e) => { if (e.key === "Enter") checkAuth(); });
 
 const showsByFormat = {
     "Pre-roll Web TV": makeFullShows(),
@@ -266,10 +444,10 @@ function makeFullShows() {
         prime: [
             { name: "Survivor", cpm: 24, from: "2026-01-01", to: "2026-04-30" },
             { name: "Τότε Vs Τώρα", cpm: 22, from: "2026-01-01", to: "2026-12-31" },
-            { name: "Στην Αγκαλιά Του Φ", cpm: 20, from: "2026-01-01", to: "2026-12-31" },
+            { name: "Στην Αγκαλιά Του Φάνη", cpm: 20, from: "2026-01-01", to: "2026-12-31" },
             { name: "The Wall", cpm: 20, from: "2026-01-01", to: "2026-07-31" },
             { name: "The Floor", cpm: 20, from: "2026-01-01", to: "2026-07-30" },
-            { name: "Διαχωρίζω Τη Θέση", cpm: 16, from: "2026-01-01", to: "2026-12-31" },
+            { name: "Διαχωρίζω Τη Θέση Μου", cpm: 16, from: "2026-01-01", to: "2026-12-31" },
             { name: "Πλυντήριο", cpm: 16, from: "2026-01-01", to: "2026-12-31" },
             { name: "Η Ζωή Σου Όλη", cpm: 16, from: "2026-01-01", to: "2026-12-31" },
             { name: "Κεντρικό Δελτίο", cpm: 24, from: "2026-01-01", to: "2026-12-31" },
@@ -310,10 +488,10 @@ function makeFilteredShows() {
         prime: [
             { name: "Survivor", cpm: 24, from: "2026-01-01", to: "2026-04-30" },
             { name: "Τότε Vs Τώρα", cpm: 22, from: "2026-01-01", to: "2026-05-31" },
-            { name: "Στην Αγκαλιά Του Φ", cpm: 20, from: "2026-01-01", to: "2026-05-31" },
+            { name: "Στην Αγκαλιά Του Φάνη", cpm: 20, from: "2026-01-01", to: "2026-05-31" },
             { name: "The Wall", cpm: 20, from: "2026-01-01", to: "2026-05-31" },
             { name: "The Floor", cpm: 20, from: "2026-01-01", to: "2026-05-30" },
-            { name: "Διαχωρίζω Τη Θέση", cpm: 16, from: "2026-01-01", to: "2026-07-31" },
+            { name: "Διαχωρίζω Τη Θέση Μου", cpm: 16, from: "2026-01-01", to: "2026-07-31" },
             { name: "Πλυντήριο", cpm: 16, from: "2026-01-01", to: "2026-07-31" },
             { name: "Η Ζωή Σου Όλη", cpm: 16, from: "2026-01-01", to: "2026-07-31" },
             { name: "Κεντρικό Δελτίο", cpm: 24, from: "2026-01-01", to: "2026-12-31" },
@@ -352,12 +530,8 @@ function validateAvailability(selectedShows, dateFrom, dateTo) {
         const to = cb.dataset.to;
         const showFrom = new Date(from);
         const showTo = new Date(to);
-        if (dateFrom && dateFrom < showFrom) {
-            warnings.push(`${name}: διαθέσιμη από ${formatEuroDate(from)} έως ${formatEuroDate(to)}`);
-        }
-        if (dateTo && dateTo > showTo) {
-            warnings.push(`${name}: διαθέσιμη από ${formatEuroDate(from)} έως ${formatEuroDate(to)}`);
-        }
+        if (dateFrom && dateFrom < showFrom) warnings.push(`${name}: από ${formatEuroDate(from)}`);
+        if (dateTo && dateTo > showTo) warnings.push(`${name}: έως ${formatEuroDate(to)}`);
     });
     return warnings;
 }
@@ -376,28 +550,16 @@ function renderShowsForFormat(format) {
         const zoneWrapper = document.getElementById(z.zoneId);
         container.innerHTML = "";
         const shows = (data && data[z.key]) ? data[z.key] : [];
-        if (!shows.length) {
-            zoneWrapper.style.display = "none";
-            return;
-        }
+        if (!shows.length) { zoneWrapper.style.display = "none"; return; }
         zoneWrapper.style.display = "block";
         shows.forEach(show => {
             const checked = prevSelected.has(show.name) ? "checked" : "";
             const html = `
                 <label class="show-item">
-                    <input type="checkbox"
-                           class="show ${z.key}"
-                           data-name="${show.name}"
-                           data-cpm="${show.cpm}"
-                           data-from="${show.from}"
-                           data-to="${show.to}"
-                           ${checked}>
-                    ${show.name}
-                    <span style="color:#666; font-size:12px; margin-left:6px;">
-                        – ${formatEuroDate(show.from)} έως ${formatEuroDate(show.to)}
-                    </span>
-                </label>
-            `;
+                    <input type="checkbox" class="show ${z.key}" data-name="${show.name}" data-cpm="${show.cpm}" data-from="${show.from}" data-to="${show.to}" ${checked}>
+                    <span>${show.name}</span>
+                    <span class="show-dates">${formatEuroDate(show.from)} - ${formatEuroDate(show.to)}</span>
+                </label>`;
             container.insertAdjacentHTML("beforeend", html);
         });
     });
@@ -417,28 +579,23 @@ function calculate() {
     const dateTo = parseDate(document.getElementById("dateTo").value);
 
     let availabilityWarnings = [];
-    if (dateFrom && dateTo && selected.length > 0) {
-        availabilityWarnings = validateAvailability([...selected], dateFrom, dateTo);
-    }
+    if (dateFrom && dateTo && selected.length > 0) availabilityWarnings = validateAvailability([...selected], dateFrom, dateTo);
 
     if (selected.length === 0 && !ros) {
-        document.getElementById("result").textContent = "Δεν έχεις επιλέξει εκπομπές.";
+        document.getElementById("result").textContent = "Επιλέξτε εκπομπές ή ROS για υπολογισμό.";
         return;
     }
 
     let avgCPM = 0;
     if (format === "Web TV Banner") {
-        if (ros) {
-            avgCPM = 4;
-        } else {
+        if (ros) avgCPM = 4;
+        else {
             const selectedArr = [...selected];
             const names = selectedArr.map(cb => cb.dataset.name.toLowerCase());
             const isPremium = n => n.includes("survivor") || n.includes("the voice");
             const hasPremium = names.some(isPremium);
             const allPremium = selectedArr.length > 0 && names.every(isPremium);
-            if (allPremium) avgCPM = 4.5;
-            else if (hasPremium) avgCPM = 4;
-            else avgCPM = 3.5;
+            if (allPremium) avgCPM = 4.5; else if (hasPremium) avgCPM = 4; else avgCPM = 3.5;
         }
     } else if (ros || format === "Pre-roll Hybrid App") {
         avgCPM = 16;
@@ -447,116 +604,63 @@ function calculate() {
         selected.forEach(cb => {
             let base = parseFloat(cb.dataset.cpm);
             if (format === "Π/C-Banner Hybrid Linear") {
-                if (cb.classList.contains("prime")) base += 2;
-                else base += 1;
+                if (cb.classList.contains("prime")) base += 2; else base += 1;
             }
             sum += base;
         });
         avgCPM = sum / selected.length;
     }
 
-    let totalDays = 1;
-    let normalDays = 1;
-    let seasonalDays = 0;
+    let totalDays = 1, normalDays = 1, seasonalDays = 0;
     if (dateFrom && dateTo && dateTo >= dateFrom) {
         totalDays = daysBetween(dateFrom, dateTo);
-        let currentYear = dateFrom.getFullYear();
-        const endYear = dateTo.getFullYear();
-        while (currentYear <= endYear) {
-            const seasonStart = new Date(currentYear, 6, 25);
-            const seasonEnd = new Date(currentYear, 8, 4);
-            const rangeStart = dateFrom > seasonStart ? dateFrom : seasonStart;
-            const rangeEnd = dateTo < seasonEnd ? dateTo : seasonEnd;
-            if (rangeEnd >= rangeStart) {
-                seasonalDays += daysBetween(rangeStart, rangeEnd);
-            }
-            currentYear++;
+        let currYear = dateFrom.getFullYear(), endYear = dateTo.getFullYear();
+        while (currYear <= endYear) {
+            const sStart = new Date(currYear, 6, 25), sEnd = new Date(currYear, 8, 4);
+            const rStart = dateFrom > sStart ? dateFrom : sStart, rEnd = dateTo < sEnd ? dateTo : sEnd;
+            if (rEnd >= rStart) seasonalDays += daysBetween(rStart, rEnd);
+            currYear++;
         }
-        normalDays = totalDays - seasonalDays;
-        if (normalDays < 0) normalDays = 0;
+        normalDays = Math.max(0, totalDays - seasonalDays);
     }
 
     const seasonalityApplied = (seasonalDays > 0 && format !== "Web TV Banner");
     const result = document.getElementById("result");
 
     if (!isNaN(costInput) && costInput > 0) {
-        let effectiveCPM = seasonalityApplied ? (normalDays * avgCPM + seasonalDays * 14) / totalDays : avgCPM;
-        let discountApplied = false;
-        if (costInput >= 3000) {
-            effectiveCPM = effectiveCPM * 0.90;
-            discountApplied = true;
-        }
-        let impressions = (costInput / effectiveCPM) * 1000;
-        let warning = "";
-        // Αλλαγή: Εμφάνιση ειδοποίησης από 1200€
-        if (!discountApplied && costInput >= 1200 && costInput < 3000) {
-            warning = `\n<span class="discount-hint">💡 Για δαπάνη 3.000 € και άνω, δικαιούστε έκπτωση CPM 10%.</span>`;
-        }
+        let effCPM = seasonalityApplied ? (normalDays * avgCPM + seasonalDays * 14) / totalDays : avgCPM;
+        let disc = false;
+        if (costInput >= 3000) { effCPM *= 0.90; disc = true; }
+        let impressions = (costInput / effCPM) * 1000;
+        let hint = (!disc && costInput >= 1200 && costInput < 3000) ? `\n<span class="discount-hint">💡 Με budget 3.000€+ κερδίζετε 10% έκπτωση στο CPM.</span>` : "";
 
-       lastResultText =
-    `Σύνολο Impressions: ${Math.round(impressions).toLocaleString("el-GR")}\n` +
-    `Κόστος: ${costInput.toLocaleString("el-GR")} €` +
-    (discountApplied 
-        ? `\n<span class="discount-info">✅ (Έχει εφαρμοστεί έκπτωση 10% στο CPM — bonus impressions)</span>` 
-        : "") +
-    (seasonalityApplied
-        ? `\n<span class="seasonality">☀️ (Έχει εφαρμοστεί seasonality CPM στις αντίστοιχες ημερομηνίες -25/7-4/9)</span>`
-        : "") +
-    warning +
-    (availabilityWarnings.length > 0
-        ? `\n\n<span class="warning">⚠️ Προειδοποιήσεις:<br>` + availabilityWarnings.join("<br>") + `</span>`
-        : "");
-
+        lastResultText = `Σύνολο Impressions: ${Math.round(impressions).toLocaleString("el-GR")}\n` +
+            `Κόστος: ${costInput.toLocaleString("el-GR")} €` +
+            (disc ? `\n<span class="discount-info">✅ Εφαρμόστηκε έκπτωση 10% (Bonus Impressions)</span>` : "") +
+            (seasonalityApplied ? `\n<span class="seasonality">☀️ Εφαρμόστηκε Seasonality CPM (25/7-4/9)</span>` : "") +
+            hint + (availabilityWarnings.length ? `\n\n<span class="warning">⚠️ Προειδοποιήσεις:<br>${availabilityWarnings.join("<br>")}</span>` : "");
         result.innerHTML = lastResultText.replace(/\n/g, "<br>");
         return;
     }
 
-    if (isNaN(centralImps) || centralImps <= 0) {
-        result.textContent = "Βάλε impressions ή κόστος.";
-        return;
-    }
+    if (isNaN(centralImps) || centralImps <= 0) { result.textContent = "Συμπληρώστε Impressions ή Budget."; return; }
 
     const impsPerDay = centralImps / totalDays;
-    let costNormal = normalDays * impsPerDay * (avgCPM / 1000);
-    let costSeasonal = seasonalDays * impsPerDay * (seasonalityApplied ? 14 / 1000 : avgCPM / 1000);
-    let totalCost = costNormal + costSeasonal;
-    let discountApplied = false;
-    let finalImps = centralImps;
+    let totalCost = (normalDays * impsPerDay * (avgCPM / 1000)) + (seasonalDays * impsPerDay * (seasonalityApplied ? 14 / 1000 : avgCPM / 1000));
+    let disc = false, finalImps = centralImps;
+    if (totalCost >= 3000) { disc = true; finalImps = Math.round((totalCost / (avgCPM * 0.9)) * 1000); }
+    let hint = (!disc && totalCost >= 1200 && totalCost < 3000) ? `\n<span class="discount-hint">💡 Με budget 3.000€+ κερδίζετε 10% έκπτωση στο CPM.</span>` : "";
 
-    if (totalCost >= 3000) {
-        discountApplied = true;
-        const discountedCPM = avgCPM * 0.90;
-        finalImps = Math.round((totalCost / discountedCPM) * 1000);
-    }
-
-    let warning = "";
-    // Αλλαγή: Εμφάνιση ειδοποίησης από 1200€
-    if (!discountApplied && totalCost >= 1200 && totalCost < 3000) {
-        warning = `\n<span class="discount-hint">💡 Για δαπάνη 3.000 € και άνω, δικαιούστε έκπτωση CPM 10%.</span>`;
-    }
-
-    lastResultText =
-    `Σύνολο Impressions: ${finalImps.toLocaleString("el-GR")}\n` +
-    `Τελικό Κόστος: ${totalCost.toLocaleString("el-GR", {
-        minimumFractionDigits: 2,
-        maximumFractionDigits: 2
-    })} €` +
-    (discountApplied 
-        ? `\n<span class="discount-info">✅ (Έχει εφαρμοστεί έκπτωση 10% στο CPM — αυξημένα impressions)</span>` 
-        : "") +
-    (seasonalityApplied 
-        ? `\n<span class="seasonality">☀️ (Έχει εφαρμοστεί seasonality CPM στις αντίστοιχες ημερομηνίες -25/7-4/9)</span>` 
-        : "") +
-    warning +
-    (availabilityWarnings.length > 0
-        ? `\n\n<span class="warning">⚠️ Προειδοποιήσεις:<br>` + availabilityWarnings.join("<br>") + `</span>`
-        : "");
-
+    lastResultText = `Σύνολο Impressions: ${finalImps.toLocaleString("el-GR")}\n` +
+        `Τελικό Κόστος: ${totalCost.toLocaleString("el-GR", {minimumFractionDigits:2})} €` +
+        (disc ? `\n<span class="discount-info">✅ Εφαρμόστηκε έκπτωση 10% (Bonus Impressions)</span>` : "") +
+        (seasonalityApplied ? `\n<span class="seasonality">☀️ Εφαρμόστηκε Seasonality CPM (25/7-4/9)</span>` : "") +
+        hint + (availabilityWarnings.length ? `\n\n<span class="warning">⚠️ Προειδοποιήσεις:<br>${availabilityWarnings.join("<br>")}</span>` : "");
     result.innerHTML = lastResultText.replace(/\n/g, "<br>");
 }
 
-function toggleZone(zoneClass) {
-    const boxes = document.querySelectorAll('.' + zoneClass);
+function toggleZone(zCls) {
+    const boxes = document.querySelectorAll('.' + zCls);
     if (!boxes.length) return;
     const allChecked = [...boxes].every(cb => cb.checked);
     boxes.forEach(cb => cb.checked = !allChecked);
@@ -573,131 +677,61 @@ function clearAll() {
     document.getElementById('dateRange').value = "";
     document.getElementById('dateFrom').value = "";
     document.getElementById('dateTo').value = "";
-    lastResultText = "";
     document.getElementById("result").textContent = "";
 }
 
 function sendEmail() {
-    if (!lastResultText) {
-        alert("Κάνε πρώτα έναν υπολογισμό πριν την αποστολή e‑mail.");
-        return;
-    }
-    const advertiser = document.getElementById("advertiser").value;
-    const plan = document.getElementById("plan").value;
-    const dateFrom = formatEuroDate(document.getElementById("dateFrom").value);
-    const dateTo = formatEuroDate(document.getElementById("dateTo").value);
-    const selectedShows = [...document.querySelectorAll('.show:checked')].map(cb => cb.dataset.name).join(", ");
-    const format = document.querySelector("input[name='format']:checked").value;
-    const ros = document.getElementById("ros").checked ? "Ναι" : "Όχι";
-    const subject = `Προγραμματισμός ${format}`;
-
-    let cleanResultText = lastResultText
-        .replace(/<br\s*\/?>/gi, "\n")
-        .replace(/<\/?[^>]+(>|$)/g, "");
-
-    const body =
-        `Διαφημιζόμενος: ${advertiser}\n` +
-        `Πλάνο: ${plan}\n` +
-        `Ημερομηνίες: ${dateFrom} - ${dateTo}\n\n` +
-        `Format: ${format}\n` +
-        `ROS: ${ros}\n` +
-        `Εκπομπές: ${selectedShows}\n\n` +
-        `${cleanResultText}`;
-
-    const mailto = `mailto:ckassos@skai.gr?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
-    window.location.href = mailto;
+    if (!lastResultText) { alert("Κάντε πρώτα έναν υπολογισμό."); return; }
+    const adv = document.getElementById("advertiser").value, pl = document.getElementById("plan").value;
+    const dFrom = formatEuroDate(document.getElementById("dateFrom").value), dTo = formatEuroDate(document.getElementById("dateTo").value);
+    const sel = [...document.querySelectorAll('.show:checked')].map(cb => cb.dataset.name).join(", ");
+    const fmt = document.querySelector("input[name='format']:checked").value;
+    const body = `Διαφημιζόμενος: ${adv}\nΠλάνο: ${pl}\nΗμερομηνίες: ${dFrom}-${dTo}\nFormat: ${fmt}\nROS: ${document.getElementById("ros").checked?"Ναι":"Όχι"}\nΕκπομπές: ${sel}\n\n${lastResultText.replace(/<[^>]+>/g, '')}`;
+    window.location.href = `mailto:ckassos@skai.gr?subject=${encodeURIComponent("Πλάνο "+fmt)}&body=${encodeURIComponent(body)}`;
 }
 
 $(function() {
     $('#dateRange').daterangepicker({
         autoUpdateInput: false,
-        locale: {
-            format: 'DD/MM/YYYY',
-            applyLabel: 'Εφαρμογή',
-            cancelLabel: 'Ακύρωση',
-            daysOfWeek: ['Κυρ','Δευ','Τρι','Τετ','Πεμ','Παρ','Σαβ'],
-            monthNames: [
-                'Ιανουάριος','Φεβρουάριος','Μάρτιος','Απρίλιος','Μάιος','Ιούνιος',
-                'Ιούλιος','Αύγουστος','Σεπτέμβριος','Οκτώβριος','Νοέμβριος','Δεκέμβριος'
-            ]
-        },
-        opens: 'center',
+        // Προσθήκη έτοιμων επιλογών
         ranges: {
-            'Επόμενες 15 ημέρες': [moment(), moment().add(14, 'days')],
-            'Επόμενος μήνας': [moment().add(1, 'month').startOf('month'), moment().add(1, 'month').endOf('month')]
+           'Επόμενες 15 ημέρες': [moment(), moment().add(14, 'days')],
+           'Επόμενος Μήνας': [moment().add(1, 'month').startOf('month'), moment().add(1, 'month').endOf('month')]
+        },
+        locale: { 
+            format: 'DD/MM/YYYY', 
+            applyLabel: 'Εφαρμογή', 
+            cancelLabel: 'Άκυρο', 
+            customRangeLabel: 'Επιλέξτε χειροκίνητα', // Όνομα για την ελεύθερη επιλογή
+            daysOfWeek: ['Κυ','Δε','Τρ','Τε','Πε','Πα','Σα'], 
+            monthNames: ['Ιαν','Φεβ','Μαρ','Απρ','Μαι','Ιουν','Ιουλ','Αυγ','Σεπ','Οκτ','Νοε','Δεκ'] 
         }
-    });
-
-    $('#dateRange').on('apply.daterangepicker', function(ev, picker) {
+    }).on('apply.daterangepicker', function(ev, picker) {
         $(this).val(picker.startDate.format('DD/MM/YYYY') + ' - ' + picker.endDate.format('DD/MM/YYYY'));
         document.getElementById("dateFrom").value = picker.startDate.format('YYYY-MM-DD');
         document.getElementById("dateTo").value = picker.endDate.format('YYYY-MM-DD');
         calculate();
     });
-
-    $('#dateRange').on('cancel.daterangepicker', function() {
-        $(this).val('');
-        document.getElementById("dateFrom").value = "";
-        document.getElementById("dateTo").value = "";
-        calculate();
-    });
 });
 
 document.getElementById("ros").addEventListener("change", () => {
-    if (document.getElementById("ros").checked) {
-        document.querySelectorAll(".show").forEach(cb => cb.checked = false);
-    }
+    if (document.getElementById("ros").checked) document.querySelectorAll(".show").forEach(cb => cb.checked = false);
     calculate();
 });
 
 document.addEventListener("change", (e) => {
     if (e.target.classList.contains("show")) {
-        if (document.getElementById("ros").checked) {
-            document.getElementById("ros").checked = false;
-        }
+        if (document.getElementById("ros").checked) document.getElementById("ros").checked = false;
         calculate();
     }
 });
 
-const impsField = document.getElementById('impressions');
-const costField = document.getElementById('cost');
+const impsField = document.getElementById('impressions'), costField = document.getElementById('cost');
+impsField.addEventListener('input', () => { if(impsField.value){ costField.value=""; costField.disabled=true; } else costField.disabled=false; calculate(); });
+costField.addEventListener('input', () => { if(costField.value){ impsField.value=""; impsField.disabled=true; } else impsField.disabled=false; calculate(); });
 
-impsField.addEventListener('input', () => {
-    const imps = parseFloat(impsField.value);
-    if (!isNaN(imps) && imps > 0) {
-        costField.value = "";
-        costField.disabled = true;
-    } else {
-        costField.disabled = false;
-    }
-    calculate();
-});
-
-costField.addEventListener('input', () => {
-    const c = parseFloat(costField.value);
-    if (!isNaN(c) && c > 0) {
-        impsField.value = "";
-        impsField.disabled = true;
-    } else {
-        impsField.disabled = false;
-    }
-    calculate();
-});
-
-window.addEventListener("load", () => {
-    const format = document.querySelector('input[name="format"]:checked').value;
-    renderShowsForFormat(format);
-    calculate();
-});
-
-document.querySelectorAll('input[name="format"]').forEach(radio => {
-    radio.addEventListener('change', () => {
-        const format = document.querySelector('input[name="format"]:checked').value;
-        renderShowsForFormat(format);
-        calculate();
-    });
-});
-
+window.addEventListener("load", () => { renderShowsForFormat(document.querySelector('input[name="format"]:checked').value); calculate(); });
+document.querySelectorAll('input[name="format"]').forEach(radio => { radio.addEventListener('change', () => { renderShowsForFormat(radio.value); calculate(); }); });
 </script>
 
 </div>
